@@ -1,0 +1,19 @@
+<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="16" height="16" rx="3" fill="#3B82F6"/>
+  
+  <!-- Simplified clipboard -->
+  <rect x="3" y="2.5" width="10" height="11" rx="1" fill="white"/>
+  
+  <!-- Clip -->
+  <rect x="6.5" y="1.5" width="3" height="1.5" rx="0.75" fill="#1E40AF"/>
+  
+  <!-- Simple checkmarks -->
+  <circle cx="5" cy="5.5" r="1" fill="#10B981"/>
+  <path d="M4.5 5.5l0.3 0.3 0.7-0.7" stroke="white" stroke-width="0.3" fill="none"/>
+  
+  <circle cx="5" cy="8" r="1" fill="#10B981"/>
+  <path d="M4.5 8l0.3 0.3 0.7-0.7" stroke="white" stroke-width="0.3" fill="none"/>
+  
+  <circle cx="5" cy="10.5" r="1" fill="#F59E0B"/>
+</svg>

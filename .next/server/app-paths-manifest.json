@@ -1,0 +1,6 @@
+{
+  "/api/extension/route": "app/api/extension/route.js",
+  "/api/ai/route": "app/api/ai/route.js",
+  "/jobs/page": "app/jobs/page.js",
+  "/jobs/[id]/page": "app/jobs/[id]/page.js"
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">Job Tracker</h1>
+            <p class="subtitle">Capture job postings with AI-powered analysis</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Job Detection Status -->
+            <div id="status-section" class="status-section">
+                <div id="job-detected" class="status-item hidden">
+                    <div class="status-icon success">✓</div>
+                    <span class="status-text">Job posting detected</span>
+                </div>
+                <div id="no-job-detected" class="status-item">
+                    <div class="status-icon warning">!</div>
+                    <span class="status-text">No job posting detected on this page</span>
+                </div>
+            </div>
+
+            <!-- Job Preview -->
+            <div id="job-preview" class="job-preview hidden">
+                <h3 class="preview-title">Job Preview:</h3>
+                <div id="job-title" class="job-title"></div>
+                <div id="job-url" class="job-url"></div>
+                <div id="description-length" class="description-info"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions">
+                <button id="capture-btn" class="btn btn-primary" disabled>
+                    <span class="btn-text">Capture Job</span>
+                    <div class="loading-spinner hidden"></div>
+                </button>
+                
+                <button id="refresh-btn" class="btn btn-secondary">
+                    <span class="btn-text">Refresh Detection</span>
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div id="result-section" class="result-section hidden">
+                <div id="success-message" class="message success hidden">
+                    <div class="message-icon">✓</div>
+                    <div class="message-content">
+                        <strong>Job captured successfully!</strong>
+                        <p>AI processing has been initiated. Check your dashboard for results.</p>
+                    </div>
+                </div>
+                
+                <div id="error-message" class="message error hidden">
+                    <div class="message-icon">✗</div>
+                    <div class="message-content">
+                        <strong>Capture failed</strong>
+                        <p id="error-text">Please try again or check your connection.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <a href="#" id="open-dashboard" class="footer-link">
+                Open Job Tracker Dashboard
+            </a>
+        </footer>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

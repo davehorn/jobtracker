@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Job {
+  id                    String   @id @default(cuid())
+  creationDate          DateTime @default(now())
+  jobDescriptionUrl     String
+  jobDescription        String
+  status                String   // pending, applied, closed, rejected, did_not_apply
+  companyName           String?
+  title                 String?
+  salaryRange           String?
+  providedSalaryRange   String?
+  jobInfo               String?  // JSON string for company information
+  jobResume             String?
+  coverLetterOutline    String?
+  appliedDate           DateTime?
+  closedDate            DateTime?
+
+  @@map("jobs")
+}
+
+model Configuration {
+  id                     String @id @default(cuid())
+  sourceResume           String
+  resumePrompt           String
+  coverLetterPrompt      String
+  selectedModel          String @default("gpt-3.5-turbo")
+
+  @@map("configurations")
+}

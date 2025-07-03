@@ -1,6 +1,8 @@
 # CLAUDE.md
-## Important!
-- All env variables are outside of the project directory.  This is detailed in the README file.  Do not forget this.  If new env variables are needed update the README file and bring to my attention.
+## CRITICAL and IMPORTANT - DO NOT FORGET
+- ABSOLUTELY NEVER make changes to the database that is going to delete data.  All database changes must be done in a manner that do not delete existing data!
+- ALWAYS update the TODO.md file per the directions in the $HOME CLAUDE.md file!
+- All env variables except DATABASE_URL are outside of the project directory.  This is detailed in the README file.  Do not forget this.  If new env variables are needed update the README file and bring to my attention.
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 

@@ -41,16 +41,23 @@ export async function processJobWithAI(jobId: string, config: Configuration): Pr
     
     const results: any = {}
 
+    // Determine resume format and content
+    const resumeFormat = config.resumeFormat || 'text'
+    const resumeContent = resumeFormat === 'structured' && config.structuredResume 
+      ? config.structuredResume 
+      : config.sourceResume
+
     // Step 1: Job Analysis & Resume Customization
     console.log('Step 1: Running job analysis and resume customization...')
     const jobAnalysisResponse = await fetch(`${baseUrl}/api/ai?service=job-analysis`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        sourceResume: config.sourceResume,
+        sourceResume: resumeContent,
         jobDescription: job.jobDescription,
         prompt: config.resumePrompt,
-        model: config.selectedModel
+        model: config.selectedModel,
+        resumeFormat: resumeFormat
       })
     })
 

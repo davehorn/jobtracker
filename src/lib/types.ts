@@ -25,6 +25,8 @@ export interface Configuration {
   resumePrompt: string
   coverLetterPrompt: string
   selectedModel: string
+  resumeFormat: ResumeFormat
+  structuredResume: string | null
 }
 
 // API request/response types
@@ -50,6 +52,8 @@ export interface UpdateConfigurationRequest {
   resumePrompt?: string
   coverLetterPrompt?: string
   selectedModel?: string
+  resumeFormat?: ResumeFormat
+  structuredResume?: string
 }
 
 // AI service types
@@ -86,4 +90,68 @@ export interface JobStats {
   closed: number
   rejected: number
   didNotApply: number
+}
+
+// Structured Resume Types
+export interface ResumeContact {
+  name: string
+  email: string
+  phone?: string
+  location?: string
+  linkedin?: string
+  github?: string
+  website?: string
+}
+
+export interface ResumeExperience {
+  company: string
+  position: string
+  startDate: string
+  endDate?: string // null/undefined for current position
+  location?: string
+  description: string[]
+  technologies?: string[]
+}
+
+export interface ResumeEducation {
+  institution: string
+  degree: string
+  field?: string
+  graduationDate?: string
+  location?: string
+  gpa?: string
+  honors?: string[]
+}
+
+export interface ResumeProject {
+  name: string
+  description: string
+  technologies?: string[]
+  url?: string
+  startDate?: string
+  endDate?: string
+}
+
+export interface ResumeSkill {
+  category: string
+  items: string[]
+}
+
+export interface StructuredResume {
+  contact: ResumeContact
+  summary?: string
+  experience: ResumeExperience[]
+  education: ResumeEducation[]
+  skills: ResumeSkill[]
+  projects?: ResumeProject[]
+  certifications?: string[]
+  awards?: string[]
+}
+
+// Resume format types for backward compatibility
+export type ResumeFormat = 'text' | 'structured'
+
+export interface ResumeData {
+  format: ResumeFormat
+  content: string | StructuredResume
 }

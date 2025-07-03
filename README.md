@@ -490,4 +490,230 @@ Create an outline that serves as a clear roadmap for writing a compelling, perso
 
 ---
 
+## Resume Format Options
+
+The Job Tracker Application supports two resume formats to accommodate different user needs and enable advanced features:
+
+### Text Format (Default)
+- **Backward Compatible**: Works with existing plain text resumes
+- **Simple Setup**: Easy copy-paste from existing resume documents
+- **AI Compatible**: AI services can process and customize text resumes
+- **Use Case**: Quick setup, users comfortable with text-only resumes
+
+### Structured JSON Format (Advanced)
+- **Rich Data Structure**: Organized resume sections with detailed metadata
+- **Advanced Features**: Enables PDF export, multiple templates, enhanced formatting
+- **Better AI Processing**: AI can work with structured data for more precise customization
+- **Professional Output**: Multiple viewing formats (formatted, text, JSON)
+- **Future-Ready**: Foundation for advanced resume features
+
+## Structured Resume JSON Schema
+
+When using the structured format, your resume data should follow this JSON schema:
+
+### Complete Schema Structure
+
+```json
+{
+  "contact": {
+    "name": "string (required)",
+    "email": "string (required)",
+    "phone": "string (optional)",
+    "location": "string (optional)",
+    "linkedin": "string (optional)",
+    "github": "string (optional)",
+    "website": "string (optional)"
+  },
+  "summary": "string (optional)",
+  "experience": [
+    {
+      "company": "string (required)",
+      "position": "string (required)",
+      "startDate": "string (required)",
+      "endDate": "string (optional - omit for current position)",
+      "location": "string (optional)",
+      "description": ["array of strings (required)"],
+      "technologies": ["array of strings (optional)"]
+    }
+  ],
+  "education": [
+    {
+      "institution": "string (required)",
+      "degree": "string (required)",
+      "field": "string (optional)",
+      "graduationDate": "string (optional)",
+      "location": "string (optional)",
+      "gpa": "string (optional)",
+      "honors": ["array of strings (optional)"]
+    }
+  ],
+  "skills": [
+    {
+      "category": "string (required)",
+      "items": ["array of strings (required)"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "string (required)",
+      "description": "string (required)",
+      "technologies": ["array of strings (optional)"],
+      "url": "string (optional)",
+      "startDate": "string (optional)",
+      "endDate": "string (optional)"
+    }
+  ],
+  "certifications": ["array of strings (optional)"],
+  "awards": ["array of strings (optional)"]
+}
+```
+
+### Example Structured Resume
+
+```json
+{
+  "contact": {
+    "name": "John Smith",
+    "email": "john.smith@email.com",
+    "phone": "(555) 123-4567",
+    "location": "San Francisco, CA",
+    "linkedin": "https://linkedin.com/in/johnsmith",
+    "github": "https://github.com/johnsmith",
+    "website": "https://johnsmith.dev"
+  },
+  "summary": "Full-stack software engineer with 5+ years of experience building scalable web applications. Passionate about clean code, user experience, and solving complex technical challenges.",
+  "experience": [
+    {
+      "company": "Tech Innovations Inc.",
+      "position": "Senior Software Engineer",
+      "startDate": "January 2022",
+      "location": "San Francisco, CA",
+      "description": [
+        "Led development of microservices architecture serving 1M+ daily users",
+        "Reduced API response times by 40% through database optimization",
+        "Mentored 3 junior developers and established code review processes"
+      ],
+      "technologies": ["Node.js", "React", "PostgreSQL", "Docker", "AWS"]
+    },
+    {
+      "company": "StartupCorp",
+      "position": "Software Engineer",
+      "startDate": "June 2019",
+      "endDate": "December 2021",
+      "location": "Remote",
+      "description": [
+        "Built responsive web applications using React and TypeScript",
+        "Implemented automated testing reducing bug reports by 60%",
+        "Collaborated with design team to improve user interface"
+      ],
+      "technologies": ["React", "TypeScript", "Jest", "CSS3", "REST APIs"]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of California, Berkeley",
+      "degree": "Bachelor of Science",
+      "field": "Computer Science",
+      "graduationDate": "May 2019",
+      "location": "Berkeley, CA",
+      "gpa": "3.7",
+      "honors": ["Dean's List", "Phi Beta Kappa"]
+    }
+  ],
+  "skills": [
+    {
+      "category": "Programming Languages",
+      "items": ["JavaScript", "TypeScript", "Python", "Java", "Go"]
+    },
+    {
+      "category": "Frontend",
+      "items": ["React", "Vue.js", "HTML5", "CSS3", "Tailwind CSS"]
+    },
+    {
+      "category": "Backend",
+      "items": ["Node.js", "Express", "Django", "PostgreSQL", "MongoDB"]
+    },
+    {
+      "category": "Tools & Platforms",
+      "items": ["Git", "Docker", "AWS", "Jenkins", "Linux"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "E-commerce Platform",
+      "description": "Full-stack e-commerce application with payment processing and inventory management",
+      "technologies": ["React", "Node.js", "PostgreSQL", "Stripe API"],
+      "url": "https://github.com/johnsmith/ecommerce-platform",
+      "startDate": "March 2023",
+      "endDate": "August 2023"
+    }
+  ],
+  "certifications": [
+    "AWS Certified Solutions Architect",
+    "Google Cloud Professional Developer"
+  ],
+  "awards": [
+    "Employee of the Month - Tech Innovations Inc. (2023)",
+    "Hackathon Winner - Berkeley CodeFest (2018)"
+  ]
+}
+```
+
+### Field Descriptions
+
+#### Contact Section (Required)
+- **name**: Your full name as it should appear on the resume
+- **email**: Professional email address
+- **phone**: Phone number with preferred formatting
+- **location**: City, State or general location (not full address for privacy)
+- **linkedin**: Full LinkedIn profile URL
+- **github**: GitHub profile URL (especially important for developers)
+- **website**: Personal website or portfolio URL
+
+#### Experience Section (Required)
+- **company**: Official company name
+- **position**: Your job title
+- **startDate**: Start date (flexible format: "January 2022", "Jan 2022", "01/2022")
+- **endDate**: End date (omit for current position)
+- **location**: Work location (office city or "Remote")
+- **description**: Array of bullet points describing achievements and responsibilities
+- **technologies**: Technologies, tools, or skills used in the role
+
+#### Education Section (Required)
+- **institution**: School/university name
+- **degree**: Degree type (Bachelor of Science, Master of Arts, etc.)
+- **field**: Major or field of study
+- **graduationDate**: Graduation date
+- **gpa**: Grade point average if notable (3.5+ typically)
+- **honors**: Academic honors, awards, or distinctions
+
+#### Skills Section (Required)
+- **category**: Skill category name (Programming Languages, Tools, etc.)
+- **items**: Array of specific skills in that category
+
+#### Projects Section (Optional)
+- **name**: Project name
+- **description**: Brief description of the project and its purpose
+- **technologies**: Technologies used in the project
+- **url**: GitHub repository or live demo URL
+- **startDate/endDate**: Project timeline
+
+### Converting from Text to Structured Format
+
+1. **Start with Contact Info**: Copy your name, email, phone, and links
+2. **Break Down Experience**: Convert each job into the experience object format
+3. **Organize Skills**: Group skills into logical categories
+4. **Add Education**: Include degree information
+5. **Optional Sections**: Add projects, certifications, awards as available
+
+### Tips for Best Results
+
+- **Use Consistent Date Formats**: Stick to one format throughout (e.g., "January 2022")
+- **Write Achievement-Focused Descriptions**: Use action verbs and quantifiable results
+- **Group Skills Logically**: Organize by technology type, not alphabetically
+- **Keep Descriptions Concise**: 1-2 lines per achievement for readability
+- **Include Relevant Keywords**: Use industry-standard terms for better AI processing
+
+---
+
 This application provides a comprehensive solution for modern job seekers, combining the power of AI with intuitive user experience to streamline and optimize the job application process.

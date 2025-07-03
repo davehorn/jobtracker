@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
 // Job analysis & resume customization service
 async function handleJobAnalysis(openai: OpenAI, body: any) {
-  const { sourceResume, jobDescription, prompt, model = 'gpt-3.5-turbo' } = body
+  const { sourceResume, jobDescription, prompt, model = 'gpt-3.5-turbo', resumeFormat = 'text' } = body
 
   if (!sourceResume || !jobDescription || !prompt) {
     return NextResponse.json<ApiResponse>({
@@ -75,20 +75,25 @@ async function handleJobAnalysis(openai: OpenAI, body: any) {
   }
 
   try {
+    // Adjust prompt based on resume format
+    const systemPrompt = resumeFormat === 'structured' 
+      ? prompt + '\n\nThe source resume is in structured JSON format. You must respond with a JSON object containing these exact fields: companyName, title, salaryRange, companyInfo, customizedResume. For customizedResume, return the updated structured JSON format with customizations applied. Make sure the JSON is valid and properly formatted.'
+      : prompt + '\n\nYou must respond with a JSON object containing these exact fields: companyName, title, salaryRange, companyInfo, customizedResume. Make sure the JSON is valid and properly formatted.'
+
     const completion = await openai.chat.completions.create({
       model,
       messages: [
         {
           role: 'system',
-          content: prompt + '\n\nYou must respond with a JSON object containing these exact fields: companyName, title, salaryRange, companyInfo, customizedResume. Make sure the JSON is valid and properly formatted.'
+          content: systemPrompt
         },
         {
           role: 'user',
-          content: `Source Resume:\n${sourceResume}\n\nJob Description:\n${jobDescription}`
+          content: `Source Resume (${resumeFormat} format):\n${sourceResume}\n\nJob Description:\n${jobDescription}`
         }
       ],
       temperature: 0.5,
-      max_tokens: 3000
+      max_tokens: 4000
     })
 
     const responseText = completion.choices[0]?.message?.content || '{}'

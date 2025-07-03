@@ -11,30 +11,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/jobs/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/jobs/page.js"
-    ],
     "/api/jobs/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/jobs/route.js"
     ],
-    "/api/jobs/[id]/route": [
+    "/config/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/jobs/[id]/route.js"
+      "static/chunks/app/config/page.js"
     ],
-    "/jobs/[id]/page": [
+    "/api/config/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/jobs/[id]/page.js"
-    ],
-    "/api/extension/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/extension/route.js"
+      "static/chunks/app/api/config/route.js"
     ],
     "/api/ai/route": [
       "static/chunks/webpack.js",

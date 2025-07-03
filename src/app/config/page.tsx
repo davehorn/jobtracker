@@ -2,6 +2,7 @@
 
 import { FileText, MessageSquare, Key, Info, Save, Loader } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import ResumePreview from '@/components/ResumePreview'
 
 interface Configuration {
   id: string
@@ -9,6 +10,8 @@ interface Configuration {
   resumePrompt: string
   coverLetterPrompt: string
   selectedModel: string
+  resumeFormat: 'text' | 'structured'
+  structuredResume: string | null
 }
 
 export default function Configuration() {
@@ -23,22 +26,29 @@ export default function Configuration() {
 
   const fetchConfiguration = async () => {
     try {
+      console.log('[Config] Fetching configuration from API')
       const response = await fetch('/api/config')
       const data = await response.json()
+      console.log('[Config] API response:', { success: data.success, hasData: !!data.data })
       
       if (data.success && data.data) {
+        console.log('[Config] Configuration loaded successfully')
         setConfig(data.data)
       } else {
+        console.log('[Config] No existing configuration found, initializing empty config')
         // Initialize with empty configuration
         setConfig({
           id: '',
           sourceResume: '',
           resumePrompt: '',
           coverLetterPrompt: '',
-          selectedModel: 'gpt-3.5-turbo'
+          selectedModel: 'gpt-3.5-turbo',
+          resumeFormat: 'text',
+          structuredResume: null
         })
       }
     } catch (error) {
+      console.error('[Config] Error fetching configuration:', error)
       setMessage({type: 'error', text: 'Failed to load configuration'})
     } finally {
       setLoading(false)
@@ -47,6 +57,16 @@ export default function Configuration() {
 
   const handleSave = async () => {
     if (!config) return
+    
+    console.log('[Config] Starting configuration save')
+    console.log('[Config] Config to save:', {
+      hasSourceResume: !!config.sourceResume,
+      hasResumePrompt: !!config.resumePrompt,
+      hasCoverLetterPrompt: !!config.coverLetterPrompt,
+      selectedModel: config.selectedModel,
+      resumeFormat: config.resumeFormat,
+      hasStructuredResume: !!config.structuredResume
+    })
     
     setSaving(true)
     setMessage(null)
@@ -58,21 +78,31 @@ export default function Configuration() {
         body: JSON.stringify(config)
       })
       
+      console.log('[Config] API response status:', response.status)
       const data = await response.json()
+      console.log('[Config] API response data:', { success: data.success, error: data.error })
+      
       if (data.success) {
+        console.log('[Config] Configuration saved successfully')
         setConfig(data.data)
         setMessage({type: 'success', text: 'Configuration saved successfully!'})
       } else {
+        console.error('[Config] API returned error:', data.error)
         setMessage({type: 'error', text: data.error || 'Failed to save configuration'})
       }
     } catch (error) {
+      console.error('[Config] Error saving configuration:', error)
+      console.error('[Config] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
       setMessage({type: 'error', text: 'Failed to save configuration'})
     } finally {
       setSaving(false)
     }
   }
 
-  const updateConfig = (field: keyof Configuration, value: string) => {
+  const updateConfig = (field: keyof Configuration, value: string | null) => {
     if (!config) return
     setConfig({...config, [field]: value})
   }
@@ -117,19 +147,87 @@ export default function Configuration() {
           <h2 id="source-resume" className="text-lg sm:text-xl font-semibold text-gray-900">Source Resume</h2>
         </div>
         <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
-          Upload or paste your master resume that will be used as the base for all customizations.
+          Choose between text format (backward compatible) or structured format (enables advanced features like PDF export).
         </p>
-        <div className="space-y-3">
-          <label className="block text-sm font-semibold text-gray-700">
-            Master Resume Content
-          </label>
-          <textarea
-            className="w-full h-32 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-gray-400"
-            placeholder="Paste your source resume here..."
-            value={config?.sourceResume || ''}
-            onChange={(e) => updateConfig('sourceResume', e.target.value)}
-          />
+        
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <label className="block text-sm font-semibold text-gray-700">
+              Resume Format
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="radio"
+                  name="resumeFormat"
+                  value="text"
+                  checked={config?.resumeFormat === 'text'}
+                  onChange={(e) => updateConfig('resumeFormat', e.target.value)}
+                  className="text-primary-600 focus:ring-primary-500"
+                />
+                <div>
+                  <div className="font-medium text-gray-900">Text Format</div>
+                  <div className="text-sm text-gray-600">Simple text format (current)</div>
+                </div>
+              </label>
+              <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="radio"
+                  name="resumeFormat"
+                  value="structured"
+                  checked={config?.resumeFormat === 'structured'}
+                  onChange={(e) => updateConfig('resumeFormat', e.target.value)}
+                  className="text-primary-600 focus:ring-primary-500"
+                />
+                <div>
+                  <div className="font-medium text-gray-900">Structured Format</div>
+                  <div className="text-sm text-gray-600">JSON format with export options</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {config?.resumeFormat === 'text' ? (
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-gray-700">
+                Master Resume Content (Text)
+              </label>
+              <textarea
+                className="w-full h-32 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-gray-400"
+                placeholder="Paste your source resume here..."
+                value={config?.sourceResume || ''}
+                onChange={(e) => updateConfig('sourceResume', e.target.value)}
+              />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-gray-700">
+                Structured Resume Data (JSON)
+              </label>
+              <textarea
+                className="w-full h-48 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-gray-400 font-mono text-sm"
+                placeholder='{"contact": {"name": "Your Name", "email": "email@example.com"}, "experience": [], "education": [], "skills": []}'
+                value={config?.structuredResume || ''}
+                onChange={(e) => updateConfig('structuredResume', e.target.value)}
+              />
+              <p className="text-xs text-gray-500">
+                Use structured JSON format for advanced features. See the README.md file for complete schema documentation and examples.
+              </p>
+            </div>
+          )}
         </div>
+        
+        {/* Resume Preview */}
+        {(config?.sourceResume || config?.structuredResume) && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="text-md font-semibold text-gray-900 mb-4">Resume Preview</h3>
+            <ResumePreview
+              resumeFormat={config.resumeFormat}
+              sourceResume={config.sourceResume}
+              structuredResume={config.structuredResume}
+            />
+          </div>
+        )}
       </section>
 
       <section className="bg-white rounded-xl shadow-soft border border-gray-100 p-4 sm:p-6" aria-labelledby="ai-prompts">

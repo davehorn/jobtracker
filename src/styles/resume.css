@@ -1,0 +1,149 @@
+/* Resume Preview Styles */
+.resume-preview .resume-professional {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color: #333;
+}
+
+.resume-preview .resume-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.resume-preview .resume-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+}
+
+.resume-preview .contact-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.resume-preview .links {
+  font-size: 0.875rem;
+}
+
+.resume-preview .links a {
+  color: #3b82f6;
+  text-decoration: none;
+  margin-right: 1rem;
+}
+
+.resume-preview .links a:hover {
+  text-decoration: underline;
+}
+
+.resume-preview section {
+  margin-bottom: 1.5rem;
+}
+
+.resume-preview section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 0.25rem;
+}
+
+.resume-preview .summary p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.resume-preview .job {
+  margin-bottom: 1.5rem;
+}
+
+.resume-preview .job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.25rem;
+}
+
+.resume-preview .job-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+}
+
+.resume-preview .company {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.resume-preview .location {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.resume-preview .dates {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.resume-preview .achievements {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem 0;
+}
+
+.resume-preview .achievements li {
+  position: relative;
+  padding-left: 1rem;
+  margin-bottom: 0.25rem;
+  color: #4b5563;
+}
+
+.resume-preview .achievements li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #6b7280;
+}
+
+.resume-preview .technologies {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.resume-preview .degree {
+  margin-bottom: 1rem;
+}
+
+.resume-preview .degree h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: #1f2937;
+}
+
+.resume-preview .school {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.resume-preview .date, 
+.resume-preview .gpa {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.resume-preview .skill-category {
+  margin-bottom: 0.5rem;
+}
+
+.resume-preview .skill-category strong {
+  color: #1f2937;
+}

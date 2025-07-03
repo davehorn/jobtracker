@@ -35,6 +35,8 @@ model Configuration {
   resumePrompt           String
   coverLetterPrompt      String
   selectedModel          String @default("gpt-3.5-turbo")
+  resumeFormat           String @default("text") // "text" or "structured"
+  structuredResume       String? // JSON string for structured resume data
 
   @@map("configurations")
 }

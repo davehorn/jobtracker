@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import '../styles/resume.css'
 import Navigation from '@/components/Navigation'
 
 export const metadata: Metadata = {

@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SalaryPromptModal from '@/components/SalaryPromptModal'
 import JobEditModal from '@/components/JobEditModal'
 import ResumeDisplay from '@/components/ResumeDisplay'
+import StructuredResumeEditor from '@/components/StructuredResumeEditor'
 import { validateStructuredResume } from '@/lib/resume-utils'
 
 interface Job {
@@ -40,6 +41,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
   const [editingResume, setEditingResume] = useState(false)
   const [editedResumeContent, setEditedResumeContent] = useState('')
   const [resumeEditError, setResumeEditError] = useState<string | null>(null)
+  const [editorMode, setEditorMode] = useState<'form' | 'json'>('form')
   const router = useRouter()
 
   useEffect(() => {
@@ -150,31 +152,90 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
   }
 
   const startResumeEdit = () => {
-    if (!job?.jobResume) return
+    console.log('[DEBUG] ========== STARTING RESUME EDIT ==========')
     
-    // Check if this is a structured resume (JSON) and format it for better readability
+    if (!job?.jobResume) {
+      console.log('[DEBUG] No job resume data found')
+      return
+    }
+    
+    console.log('[DEBUG] Job resume data length:', job.jobResume.length)
+    console.log('[DEBUG] Job resume preview:', job.jobResume.substring(0, 200))
+    
+    // Check if this is a structured resume (JSON) and set default editor mode
+    let isStructured = false
     try {
       const parsed = JSON.parse(job.jobResume)
-      if (validateStructuredResume(parsed)) {
-        // Format JSON with proper indentation
+      console.log('[DEBUG] ✅ JSON parsing successful')
+      console.log('[DEBUG] JSON keys found:', Object.keys(parsed))
+      
+      const validationResult = validateStructuredResume(parsed)
+      console.log('[DEBUG] Validation result:', validationResult)
+      
+      if (validationResult) {
+        isStructured = true
+        console.log('[DEBUG] ✅ STRUCTURED RESUME DETECTED - Will use FORM editor')
+        // Format JSON with proper indentation for JSON editor
         setEditedResumeContent(JSON.stringify(parsed, null, 2))
       } else {
+        console.log('[DEBUG] ❌ Invalid structured resume - Will use JSON editor')
         // Not a valid structured resume, treat as plain text
         setEditedResumeContent(job.jobResume)
       }
-    } catch {
+    } catch (error) {
+      console.log('[DEBUG] ❌ JSON parsing failed - Will use JSON editor')
+      console.log('[DEBUG] Parse error:', error)
       // Not valid JSON, treat as plain text
       setEditedResumeContent(job.jobResume)
     }
     
+    // Set default editor mode: form for structured resumes, JSON for plain text
+    const selectedMode = isStructured ? 'form' : 'json'
+    console.log('[DEBUG] 🎯 FINAL EDITOR MODE:', selectedMode)
+    
+    setEditorMode(selectedMode)
     setResumeEditError(null)
     setEditingResume(true)
+    
+    console.log('[DEBUG] ========== RESUME EDIT SETUP COMPLETE ==========')
   }
 
   const cancelResumeEdit = () => {
     setEditingResume(false)
     setEditedResumeContent('')
     setResumeEditError(null)
+  }
+
+  const handleFormSave = (resumeData: string) => {
+    saveResumeWithData(resumeData)
+  }
+
+  const saveResumeWithData = async (resumeData: string) => {
+    if (!job) return
+
+    setResumeEditError(null)
+    setUpdating(true)
+    try {
+      const response = await fetch(`/api/jobs/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobResume: resumeData })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        setJob(data.data)
+        setEditingResume(false)
+        setEditedResumeContent('')
+        setResumeEditError(null)
+      } else {
+        setError(data.error || 'Failed to update resume')
+      }
+    } catch (err) {
+      setError('Failed to update resume')
+    } finally {
+      setUpdating(false)
+    }
   }
 
   const saveResumeEdit = async () => {
@@ -195,29 +256,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
       }
     }
 
-    setResumeEditError(null)
-    setUpdating(true)
-    try {
-      const response = await fetch(`/api/jobs/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobResume: trimmedContent })
-      })
-      
-      const data = await response.json()
-      if (data.success) {
-        setJob(data.data)
-        setEditingResume(false)
-        setEditedResumeContent('')
-        setResumeEditError(null)
-      } else {
-        setError(data.error || 'Failed to update resume')
-      }
-    } catch (err) {
-      setError('Failed to update resume')
-    } finally {
-      setUpdating(false)
-    }
+    saveResumeWithData(trimmedContent)
   }
 
   if (loading) {
@@ -399,46 +438,105 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                   <div className="bg-green-50 rounded-lg p-4 border border-green-100">
                     {editingResume ? (
                       <div className="space-y-4">
-                        <div className="space-y-2">
-                          <textarea
-                            value={editedResumeContent}
-                            onChange={(e) => setEditedResumeContent(e.target.value)}
-                            className="w-full h-96 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm font-mono resize-none bg-gray-50"
-                            placeholder="Edit your resume content..."
-                          />
-                          {editedResumeContent.trim().startsWith('{') && (
-                            <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                              📝 Structured resume detected - JSON format with proper indentation for easy editing
-                            </div>
-                          )}
+                        {/* Editor Mode Toggle */}
+                        <div className="flex items-center justify-between border-b border-green-200 pb-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm font-medium text-gray-700">Edit Mode:</span>
+                            <button
+                              onClick={() => {
+                                console.log('[DEBUG] User clicked Form Editor button')
+                                setEditorMode('form')
+                              }}
+                              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                editorMode === 'form'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                            >
+                              Form Editor
+                            </button>
+                            <button
+                              onClick={() => {
+                                console.log('[DEBUG] User clicked JSON Editor button')
+                                setEditorMode('json')
+                              }}
+                              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                editorMode === 'json'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                            >
+                              JSON Editor
+                            </button>
+                          </div>
+                          <div className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                            Active: {editorMode.toUpperCase()}
+                          </div>
                         </div>
-                        {resumeEditError && (
-                          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                            <div className="flex items-start space-x-2">
-                              <div className="text-red-600 text-sm">
-                                <strong>Validation Error:</strong> {resumeEditError}
+
+                        {/* Form Editor */}
+                        {editorMode === 'form' && (
+                          <div>
+                            <div className="mb-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                              🔧 DEBUG: Form Editor Active - Loading StructuredResumeEditor component
+                            </div>
+                            <StructuredResumeEditor
+                              initialData={job.jobResume || '{}'}
+                              onSave={handleFormSave}
+                              onCancel={cancelResumeEdit}
+                              loading={updating}
+                            />
+                          </div>
+                        )}
+
+                        {/* JSON Editor */}
+                        {editorMode === 'json' && (
+                          <div className="space-y-4">
+                            <div className="mb-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              🔧 DEBUG: JSON Editor Active
+                            </div>
+                            <div className="space-y-2">
+                              <textarea
+                                value={editedResumeContent}
+                                onChange={(e) => setEditedResumeContent(e.target.value)}
+                                className="w-full h-96 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm font-mono resize-none bg-gray-50"
+                                placeholder="Edit your resume content..."
+                              />
+                              {editedResumeContent.trim().startsWith('{') && (
+                                <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                  📝 Structured resume detected - JSON format with proper indentation for easy editing
+                                </div>
+                              )}
+                            </div>
+                            {resumeEditError && (
+                              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                                <div className="flex items-start space-x-2">
+                                  <div className="text-red-600 text-sm">
+                                    <strong>Validation Error:</strong> {resumeEditError}
+                                  </div>
+                                </div>
                               </div>
+                            )}
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={saveResumeEdit}
+                                disabled={updating || !editedResumeContent.trim()}
+                                className="flex items-center space-x-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                              >
+                                <Save className="h-4 w-4" />
+                                <span>{updating ? 'Saving...' : 'Save'}</span>
+                              </button>
+                              <button
+                                onClick={cancelResumeEdit}
+                                disabled={updating}
+                                className="flex items-center space-x-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 transition-colors text-sm font-medium"
+                              >
+                                <X className="h-4 w-4" />
+                                <span>Cancel</span>
+                              </button>
                             </div>
                           </div>
                         )}
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={saveResumeEdit}
-                            disabled={updating || !editedResumeContent.trim()}
-                            className="flex items-center space-x-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                          >
-                            <Save className="h-4 w-4" />
-                            <span>{updating ? 'Saving...' : 'Save'}</span>
-                          </button>
-                          <button
-                            onClick={cancelResumeEdit}
-                            disabled={updating}
-                            className="flex items-center space-x-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 transition-colors text-sm font-medium"
-                          >
-                            <X className="h-4 w-4" />
-                            <span>Cancel</span>
-                          </button>
-                        </div>
                       </div>
                     ) : (
                       <ResumeDisplay resumeData={job.jobResume} />

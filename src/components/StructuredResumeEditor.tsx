@@ -326,7 +326,7 @@ export default function StructuredResumeEditor({
   console.log('[DEBUG] Form data email:', formData.contact?.email || 'NO EMAIL SET')
   
   return (
-    <div className="space-y-6 max-h-96 overflow-y-auto border-2 border-green-300 bg-green-25 p-4 rounded-lg">
+    <div className="space-y-6 max-h-screen overflow-y-auto border-2 border-green-300 bg-green-25 p-4 rounded-lg">
       <div className="bg-green-100 text-green-800 px-3 py-2 rounded text-sm">
         🟢 <strong>StructuredResumeEditor Component Loaded Successfully</strong>
         <br />Contact Name: {formData.contact?.name || 'Not set'}
@@ -572,6 +572,42 @@ export default function StructuredResumeEditor({
                   )}
                 </div>
               ))}
+            </div>
+            
+            {/* Technologies */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">Technologies Used</label>
+                <button
+                  type="button"
+                  onClick={() => addExperienceTechnology(expIndex)}
+                  className="flex items-center space-x-1 px-2 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
+                >
+                  <Plus className="h-3 w-3" />
+                  <span>Add Technology</span>
+                </button>
+              </div>
+              {(exp.technologies || []).map((tech, techIndex) => (
+                <div key={techIndex} className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={tech}
+                    onChange={(e) => updateExperienceTechnology(expIndex, techIndex, e.target.value)}
+                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                    placeholder="e.g., React, Node.js, PostgreSQL, AWS"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeExperienceTechnology(expIndex, techIndex)}
+                    className="p-1 text-red-600 hover:text-red-800"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {(!exp.technologies || exp.technologies.length === 0) && (
+                <p className="text-xs text-gray-500 italic">No technologies added yet. Click "Add Technology" to include tools and technologies used.</p>
+              )}
             </div>
           </div>
         ))}

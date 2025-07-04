@@ -2,13 +2,14 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Building, Calendar, DollarSign, FileText, Briefcase, Edit, Save, X } from 'lucide-react'
+import { ArrowLeft, Building, Calendar, DollarSign, FileText, Briefcase, Edit, Save, X, Download } from 'lucide-react'
 import Link from 'next/link'
 import SalaryPromptModal from '@/components/SalaryPromptModal'
 import JobEditModal from '@/components/JobEditModal'
 import ResumeDisplay from '@/components/ResumeDisplay'
 import StructuredResumeEditor from '@/components/StructuredResumeEditor'
 import { validateStructuredResume } from '@/lib/resume-utils'
+import { exportResumeToPDF, isPDFExportSupported } from '@/lib/pdf-export'
 
 interface Job {
   id: string
@@ -42,6 +43,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
   const [editedResumeContent, setEditedResumeContent] = useState('')
   const [resumeEditError, setResumeEditError] = useState<string | null>(null)
   const [editorMode, setEditorMode] = useState<'form' | 'json'>('form')
+  const [exportingPDF, setExportingPDF] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -259,6 +261,43 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
     saveResumeWithData(trimmedContent)
   }
 
+  const handleExportPDF = async () => {
+    console.log('[JOB] 🚀 PDF Export button clicked')
+    console.log('[JOB] Job data:', {
+      id: job?.id,
+      companyName: job?.companyName,
+      title: job?.title,
+      hasResume: !!job?.jobResume,
+      resumeLength: job?.jobResume?.length || 0
+    })
+    
+    if (!job?.jobResume) {
+      console.log('[JOB] ❌ No resume data available')
+      setError('No resume data available to export')
+      return
+    }
+
+    console.log('[JOB] Resume data preview:', job.jobResume.substring(0, 200))
+    
+    setExportingPDF(true)
+    setError(null)
+
+    try {
+      console.log('[JOB] 📞 Calling exportResumeToPDF function...')
+      await exportResumeToPDF({
+        resumeData: job.jobResume,
+        companyName: job.companyName || undefined,
+        jobTitle: job.title || undefined
+      })
+      console.log('[JOB] ✅ PDF export completed successfully')
+    } catch (err) {
+      console.error('[JOB] ❌ PDF export error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to export PDF')
+    } finally {
+      setExportingPDF(false)
+    }
+  }
+
   if (loading) {
     return (
       <main className="space-y-6">
@@ -424,14 +463,25 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                       <span>Customized Resume</span>
                     </h4>
                     {!editingResume && (
-                      <button
-                        onClick={startResumeEdit}
-                        disabled={updating}
-                        className="flex items-center space-x-1 px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-                      >
-                        <Edit className="h-3 w-3" />
-                        <span>Edit</span>
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={handleExportPDF}
+                          disabled={updating || exportingPDF || !isPDFExportSupported()}
+                          className="flex items-center space-x-1 px-3 py-1 text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={!isPDFExportSupported() ? 'PDF export not supported in this browser' : 'Export resume as PDF'}
+                        >
+                          <Download className="h-3 w-3" />
+                          <span>{exportingPDF ? 'Exporting...' : 'Export PDF'}</span>
+                        </button>
+                        <button
+                          onClick={startResumeEdit}
+                          disabled={updating}
+                          className="flex items-center space-x-1 px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          <Edit className="h-3 w-3" />
+                          <span>Edit</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                   

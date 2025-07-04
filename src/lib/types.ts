@@ -62,7 +62,7 @@ export interface AIJobAnalysisResponse {
   title?: string
   salaryRange?: string
   companyInfo?: string
-  customizedResume: string
+  customizedResume?: string  // Optional since we'll copy source resume directly
   matchedKeywords: string[]
   unmatchedKeywords: string[]
 }

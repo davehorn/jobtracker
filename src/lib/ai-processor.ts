@@ -47,33 +47,85 @@ export async function processJobWithAI(jobId: string, config: Configuration): Pr
       ? config.structuredResume 
       : config.sourceResume
 
+    // DEBUG LOGGING: Resume data validation
+    console.log('\n=== DEBUG: AI Processor Resume Data Analysis ===')
+    console.log('Resume Format Selected:', resumeFormat)
+    console.log('Config has sourceResume:', !!config.sourceResume)
+    console.log('Config has structuredResume:', !!config.structuredResume)
+    console.log('Resume Content Length:', resumeContent?.length || 0)
+    console.log('Resume Content Type:', typeof resumeContent)
+    
+    // Log resume content structure
+    if (resumeFormat === 'structured' && resumeContent) {
+      try {
+        const parsedResume = JSON.parse(resumeContent)
+        console.log('Structured Resume Sections Found:', Object.keys(parsedResume))
+        console.log('Contact Info:', parsedResume.contact ? 'Present' : 'Missing')
+        console.log('Experience Entries:', parsedResume.experience?.length || 0)
+        console.log('Certifications:', parsedResume.certifications?.length || 0)
+        console.log('Education Entries:', parsedResume.education?.length || 0)
+        console.log('Skills Categories:', parsedResume.skills?.length || 0)
+        
+        // Log certifications specifically since they're being removed
+        if (parsedResume.certifications) {
+          console.log('Original Certifications List:', parsedResume.certifications)
+        }
+      } catch (parseError) {
+        console.error('Failed to parse structured resume:', parseError)
+        console.log('Raw resume content (COMPLETE):')
+        console.log(resumeContent)
+      }
+    } else {
+      console.log('Text Resume Content (COMPLETE):')
+      console.log(resumeContent || 'NO CONTENT')
+    }
+
     // Step 1: Job Analysis & Resume Customization
     console.log('Step 1: Running job analysis and resume customization...')
+    
+    // DEBUG LOGGING: API Request Body
+    const requestBody = {
+      sourceResume: resumeContent,
+      jobDescription: job.jobDescription,
+      prompt: config.resumePrompt,
+      model: config.selectedModel,
+      resumeFormat: resumeFormat
+    }
+    
+    console.log('\n=== DEBUG: Job Analysis API Request ===')
+    console.log('Request URL:', `${baseUrl}/api/ai?service=job-analysis`)
+    console.log('Resume Format in Request:', requestBody.resumeFormat)
+    console.log('Source Resume Length:', requestBody.sourceResume?.length || 0)
+    console.log('Job Description Length:', requestBody.jobDescription?.length || 0)
+    console.log('Prompt Length:', requestBody.prompt?.length || 0)
+    console.log('Selected Model:', requestBody.model)
+    console.log('Source Resume (COMPLETE - Length:', requestBody.sourceResume?.length || 0, 'chars):')
+    console.log(requestBody.sourceResume || 'NO RESUME')
+    
     const jobAnalysisResponse = await fetch(`${baseUrl}/api/ai?service=job-analysis`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sourceResume: resumeContent,
-        jobDescription: job.jobDescription,
-        prompt: config.resumePrompt,
-        model: config.selectedModel,
-        resumeFormat: resumeFormat
-      })
+      body: JSON.stringify(requestBody)
     })
 
     if (jobAnalysisResponse.ok) {
       const jobAnalysisData = await jobAnalysisResponse.json()
       if (jobAnalysisData.success) {
         results.jobAnalysis = jobAnalysisData.data
-        console.log('Job analysis completed:', {
-          companyName: results.jobAnalysis.companyName,
-          title: results.jobAnalysis.title,
-          salaryRange: results.jobAnalysis.salaryRange,
-          hasCompanyInfo: !!results.jobAnalysis.companyInfo,
-          hasCustomizedResume: !!results.jobAnalysis.customizedResume,
-          matchedKeywords: results.jobAnalysis.matchedKeywords?.length || 0,
-          unmatchedKeywords: results.jobAnalysis.unmatchedKeywords?.length || 0
-        })
+        
+        // DEBUG LOGGING: API Response Analysis
+        console.log('\n=== DEBUG: Job Analysis API Response ===')
+        console.log('Response Status: SUCCESS')
+        console.log('Company Name:', results.jobAnalysis.companyName)
+        console.log('Title:', results.jobAnalysis.title)
+        console.log('Salary Range:', results.jobAnalysis.salaryRange)
+        console.log('Has Company Info:', !!results.jobAnalysis.companyInfo)
+        console.log('Company Info Length:', results.jobAnalysis.companyInfo?.length || 0)
+        console.log('Matched Keywords Count:', results.jobAnalysis.matchedKeywords?.length || 0)
+        console.log('Unmatched Keywords Count:', results.jobAnalysis.unmatchedKeywords?.length || 0)
+        console.log('✅ No resume modification - using source resume directly')
+        
+        console.log('Job analysis completed successfully')
       } else {
         console.error('Job analysis failed:', jobAnalysisData.error)
       }
@@ -117,18 +169,33 @@ export async function processJobWithAI(jobId: string, config: Configuration): Pr
       if (results.jobAnalysis.title) updateData.title = results.jobAnalysis.title
       if (results.jobAnalysis.salaryRange) updateData.providedSalaryRange = results.jobAnalysis.salaryRange
       if (results.jobAnalysis.companyInfo) updateData.jobInfo = results.jobAnalysis.companyInfo
-      if (results.jobAnalysis.customizedResume) {
-        // Handle both string and structured resume formats
-        const resume = results.jobAnalysis.customizedResume
-        if (typeof resume === 'string') {
-          // Plain text resume - use as-is
-          updateData.jobResume = resume
-          console.log('AI Processor: Saving text resume to database')
+      
+      // Always save the source resume (no AI modification)
+      console.log('\n=== DEBUG: Database Save Resume Processing ===')
+      console.log('Using source resume directly (no AI modification)')
+      console.log('Resume Format:', resumeFormat)
+      console.log('Resume Content Length:', resumeContent?.length || 0)
+      
+      if (resumeContent) {
+        updateData.jobResume = resumeContent
+        console.log('AI Processor: Saving source resume to database')
+        
+        // Log resume format info
+        if (resumeFormat === 'structured') {
+          try {
+            const parsedResume = JSON.parse(resumeContent)
+            console.log('Source Resume Sections:', Object.keys(parsedResume))
+            console.log('Experience Entries:', parsedResume.experience?.length || 0)
+            console.log('Certifications:', parsedResume.certifications?.length || 0)
+            console.log('Education Entries:', parsedResume.education?.length || 0)
+          } catch (parseError) {
+            console.log('Resume stored as text format')
+          }
         } else {
-          // Structured resume object - serialize to JSON string
-          updateData.jobResume = JSON.stringify(resume)
-          console.log('AI Processor: Saving structured resume (JSON) to database')
+          console.log('Resume stored as text format')
         }
+      } else {
+        console.error('🚨 NO SOURCE RESUME CONTENT TO SAVE!')
       }
       
       // Handle keyword arrays - serialize to JSON strings for database storage

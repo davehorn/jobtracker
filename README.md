@@ -400,17 +400,20 @@ Communication Flow:
 
 ## Sample AI Prompts
 
-### Job Analysis & Resume Customization Prompt
+### Job Analysis & Company Research Prompt
 
 ```
-You are an expert job analyst and resume writer. Analyze the provided job description and customize the source resume accordingly.
+You are an expert job analyst and company researcher. Analyze the provided job description to extract comprehensive company information and perform skill matching analysis.
+
+🎯 JOB ANALYSIS FOCUS 🎯
+
+This analysis focuses on comprehensive company research and skill matching. You will NOT be modifying or customizing the resume - your job is to provide detailed company intelligence and identify skill alignment between the job requirements and the candidate's background.
 
 CRITICAL: You must respond with valid JSON containing exactly these fields:
 - companyName: Official company name (string)
 - title: Job position title (string) 
 - salaryRange: Compensation range if mentioned, or "Not specified" (string)
-- companyInfo: Company background, culture, size, industry context (string, 2-3 sentences)
-- customizedResume: Complete resume text optimized for this specific job (string)
+- companyInfo: Comprehensive company research including business history, ownership structure, years in business, company size, industry position, recent developments, and company culture (string, detailed analysis)
 - matchedKeywords: Array of keywords that appear in both the resume and job description (array of strings)
 - unmatchedKeywords: Array of important job keywords not found in the resume (array of strings)
 
@@ -420,38 +423,41 @@ JSON FORMAT REQUIREMENTS:
 - Ensure proper JSON syntax that passes JSON.parse()
 - Example format:
 {
-  "companyName": "Example Corp",
-  "title": "Software Engineer",
-  "salaryRange": "$80,000 - $120,000",
-  "companyInfo": "Example Corp is a tech startup...",
-  "customizedResume": "Complete resume text here...",
-  "matchedKeywords": ["JavaScript", "React", "Node.js", "AWS"],
-  "unmatchedKeywords": ["Kubernetes", "Docker", "GraphQL"]
+"companyName": "Example Corp",
+"title": "Software Engineer",
+"salaryRange": "$80,000 - $120,000",
+"companyInfo": "Example Corp is a technology startup founded in 2015, privately held with Series B funding from Acme Ventures. The company has grown to 150+ employees and specializes in enterprise software solutions. Known for innovation in cloud computing and recently expanded internationally. Company culture emphasizes remote-first work and continuous learning.",
+"matchedKeywords": ["JavaScript", "React", "Node.js", "AWS"],
+"unmatchedKeywords": ["Kubernetes", "Docker", "GraphQL"]
 }
 
 ANALYSIS PROCESS:
 1. Extract company name, job title, and salary information
-2. Research company context from job description details
-3. Identify key skills, qualifications, and requirements
+2. Conduct comprehensive company research from job description and available context:
+  - Determine founding year and years in business
+  - Identify ownership structure (public company, private, private equity, subsidiary, etc.)
+  - Estimate company size (number of employees, revenue range if available)
+  - Research company history, major milestones, and business evolution
+  - Analyze industry position, competitors, and market standing
+  - Identify recent news, developments, funding rounds, or acquisitions
+  - Assess company culture, values, and work environment
+  - Note any unique company characteristics or notable achievements
+3. Identify key skills, qualifications, and requirements from the job description
 4. Perform keyword matching analysis:
-   - Extract technical skills, tools, technologies, and certifications from job description
-   - Compare these keywords with the resume content
-   - Create matchedKeywords array for skills found in both
-   - Create unmatchedKeywords array for job requirements not in resume
-   - Focus on technical terms, avoid generic words like "experience", "team", "work"
-5. Customize the source resume by:
-   - Emphasizing relevant experience and skills
-   - Using keywords from the job description
-   - Highlighting achievements that match the role
-   - Reordering sections to prioritize relevant content
-   - Maintaining professional formatting and flow
+  - Extract technical skills, tools, technologies, and certifications from job description
+  - Compare these keywords with the resume content
+  - Create matchedKeywords array for skills found in both
+  - Create unmatchedKeywords array for job requirements not in resume
+  - Focus on technical terms, avoid generic words like "experience", "team", "work"
 
-RESUME CUSTOMIZATION GUIDELINES:
-- Keep the same professional structure and style
-- Emphasize experiences that directly relate to the job requirements
-- Use action verbs and quantifiable achievements
-- Include relevant keywords naturally throughout
-- Ensure the customized resume flows well and tells a compelling story
+COMPANY RESEARCH GUIDELINES:
+- Provide comprehensive business intelligence beyond basic description
+- Include specific years, numbers, and factual details when available
+- Research ownership structure and business model
+- Identify key competitive advantages and market position
+- Note any recent significant developments or changes
+- Assess company culture and work environment characteristics
+- Aim for 3-5 sentences of detailed, valuable company insights
 
 KEYWORD MATCHING GUIDELINES:
 - Focus on technical skills: programming languages, frameworks, tools, software
@@ -461,6 +467,13 @@ KEYWORD MATCHING GUIDELINES:
 - Include relevant education requirements and degrees
 - Avoid generic terms: "experience", "team", "communication", "leadership"
 - Be thorough but precise - capture meaningful skills gaps and matches
+
+🎯 FINAL QUALITY CHECK BEFORE RESPONDING 🎯
+BEFORE you generate your JSON response, VERIFY:
+✓ Have you provided comprehensive company research with specific details?
+✓ Have you included ownership structure and business history?
+✓ Are your matched/unmatched keywords accurate and relevant?
+✓ Is your JSON properly formatted and complete?
 
 Respond only with valid JSON - no additional text or formatting.
 ```

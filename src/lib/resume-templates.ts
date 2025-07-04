@@ -83,6 +83,39 @@ export const professionalTemplate: ResumeTemplate = {
             `).join('')}
           </section>
         ` : ''}
+        
+        ${resume.projects && resume.projects.length > 0 ? `
+          <section class="projects">
+            <h2>Projects</h2>
+            ${resume.projects.map(project => `
+              <div class="project">
+                <h3>${project.name}</h3>
+                ${project.description ? `<p>${project.description}</p>` : ''}
+                ${project.technologies && project.technologies.length > 0 ? 
+                  `<div class="technologies">Technologies: ${project.technologies.join(', ')}</div>` : ''}
+                ${project.url ? `<div class="project-url"><a href="${project.url}">${project.url}</a></div>` : ''}
+              </div>
+            `).join('')}
+          </section>
+        ` : ''}
+        
+        ${resume.certifications && resume.certifications.length > 0 ? `
+          <section class="certifications">
+            <h2>Certifications</h2>
+            <ul>
+              ${resume.certifications.map(cert => `<li>${cert}</li>`).join('')}
+            </ul>
+          </section>
+        ` : ''}
+        
+        ${resume.awards && resume.awards.length > 0 ? `
+          <section class="awards">
+            <h2>Awards</h2>
+            <ul>
+              ${resume.awards.map(award => `<li>${award}</li>`).join('')}
+            </ul>
+          </section>
+        ` : ''}
       </div>
     `
   },
@@ -146,6 +179,38 @@ export const professionalTemplate: ResumeTemplate = {
       text += 'SKILLS\n'
       resume.skills.forEach(skill => {
         text += `${skill.category}: ${skill.items.join(', ')}\n`
+      })
+      text += '\n'
+    }
+    
+    // Projects
+    if (resume.projects && resume.projects.length > 0) {
+      text += 'PROJECTS\n'
+      resume.projects.forEach(project => {
+        text += `${project.name}\n`
+        if (project.description) text += `${project.description}\n`
+        if (project.technologies && project.technologies.length > 0) {
+          text += `Technologies: ${project.technologies.join(', ')}\n`
+        }
+        if (project.url) text += `${project.url}\n`
+        text += '\n'
+      })
+    }
+    
+    // Certifications
+    if (resume.certifications && resume.certifications.length > 0) {
+      text += 'CERTIFICATIONS\n'
+      resume.certifications.forEach(cert => {
+        text += `• ${cert}\n`
+      })
+      text += '\n'
+    }
+    
+    // Awards
+    if (resume.awards && resume.awards.length > 0) {
+      text += 'AWARDS\n'
+      resume.awards.forEach(award => {
+        text += `• ${award}\n`
       })
     }
     

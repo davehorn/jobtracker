@@ -11,7 +11,7 @@ export async function GET() {
 
     return NextResponse.json<ApiResponse<Configuration | null>>({
       success: true,
-      data: config
+      data: config as Configuration | null
     })
   } catch (error) {
     console.error('[API] Error fetching configuration:', error)
@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest) {
           resumeFormat: body.resumeFormat || existingConfig.resumeFormat,
           structuredResume: body.structuredResume !== undefined ? body.structuredResume : existingConfig.structuredResume
         }
-      })
+      }) as Configuration
       console.log('[API] Configuration updated successfully')
     } else {
       console.log('[API] Creating new configuration')
@@ -70,13 +70,13 @@ export async function PUT(request: NextRequest) {
           resumeFormat: body.resumeFormat || 'text',
           structuredResume: body.structuredResume || null
         }
-      })
+      }) as Configuration
       console.log('[API] Configuration created successfully')
     }
 
     return NextResponse.json<ApiResponse<Configuration>>({
       success: true,
-      data: config
+      data: config as Configuration
     })
   } catch (error) {
     console.error('[API] Error updating configuration:', error)

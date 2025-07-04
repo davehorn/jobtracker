@@ -2,10 +2,11 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Building, Calendar, DollarSign, FileText, Briefcase, Edit } from 'lucide-react'
+import { ArrowLeft, Building, Calendar, DollarSign, FileText, Briefcase, Edit, Save, X } from 'lucide-react'
 import Link from 'next/link'
 import SalaryPromptModal from '@/components/SalaryPromptModal'
 import JobEditModal from '@/components/JobEditModal'
+import ResumeDisplay from '@/components/ResumeDisplay'
 
 interface Job {
   id: string
@@ -35,6 +36,8 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
     jobTitle: string
   }>({ isOpen: false, jobTitle: '' })
   const [editModal, setEditModal] = useState(false)
+  const [editingResume, setEditingResume] = useState(false)
+  const [editedResumeContent, setEditedResumeContent] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -139,6 +142,43 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
       }
     } catch (err) {
       setError('Failed to update job')
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const startResumeEdit = () => {
+    if (!job?.jobResume) return
+    setEditedResumeContent(job.jobResume)
+    setEditingResume(true)
+  }
+
+  const cancelResumeEdit = () => {
+    setEditingResume(false)
+    setEditedResumeContent('')
+  }
+
+  const saveResumeEdit = async () => {
+    if (!job || !editedResumeContent.trim()) return
+
+    setUpdating(true)
+    try {
+      const response = await fetch(`/api/jobs/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobResume: editedResumeContent.trim() })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        setJob(data.data)
+        setEditingResume(false)
+        setEditedResumeContent('')
+      } else {
+        setError(data.error || 'Failed to update resume')
+      }
+    } catch (err) {
+      setError('Failed to update resume')
     } finally {
       setUpdating(false)
     }
@@ -303,14 +343,54 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
               {/* Customized Resume */}
               {job.jobResume && (
                 <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-gray-600" />
-                    <span>Customized Resume</span>
-                  </h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-md font-medium text-gray-900 flex items-center space-x-2">
+                      <FileText className="h-4 w-4 text-gray-600" />
+                      <span>Customized Resume</span>
+                    </h4>
+                    {!editingResume && (
+                      <button
+                        onClick={startResumeEdit}
+                        disabled={updating}
+                        className="flex items-center space-x-1 px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <Edit className="h-3 w-3" />
+                        <span>Edit</span>
+                      </button>
+                    )}
+                  </div>
+                  
                   <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-                    <div className="text-gray-700 text-sm whitespace-pre-wrap">
-                      {job.jobResume}
-                    </div>
+                    {editingResume ? (
+                      <div className="space-y-4">
+                        <textarea
+                          value={editedResumeContent}
+                          onChange={(e) => setEditedResumeContent(e.target.value)}
+                          className="w-full h-96 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm font-mono resize-none"
+                          placeholder="Edit your resume content..."
+                        />
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={saveResumeEdit}
+                            disabled={updating || !editedResumeContent.trim()}
+                            className="flex items-center space-x-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                          >
+                            <Save className="h-4 w-4" />
+                            <span>{updating ? 'Saving...' : 'Save'}</span>
+                          </button>
+                          <button
+                            onClick={cancelResumeEdit}
+                            disabled={updating}
+                            className="flex items-center space-x-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 transition-colors text-sm font-medium"
+                          >
+                            <X className="h-4 w-4" />
+                            <span>Cancel</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <ResumeDisplay resumeData={job.jobResume} />
+                    )}
                   </div>
                 </div>
               )}

@@ -115,7 +115,19 @@ export async function processJobWithAI(jobId: string, config: Configuration): Pr
       if (results.jobAnalysis.title) updateData.title = results.jobAnalysis.title
       if (results.jobAnalysis.salaryRange) updateData.providedSalaryRange = results.jobAnalysis.salaryRange
       if (results.jobAnalysis.companyInfo) updateData.jobInfo = results.jobAnalysis.companyInfo
-      if (results.jobAnalysis.customizedResume) updateData.jobResume = results.jobAnalysis.customizedResume
+      if (results.jobAnalysis.customizedResume) {
+        // Handle both string and structured resume formats
+        const resume = results.jobAnalysis.customizedResume
+        if (typeof resume === 'string') {
+          // Plain text resume - use as-is
+          updateData.jobResume = resume
+          console.log('AI Processor: Saving text resume to database')
+        } else {
+          // Structured resume object - serialize to JSON string
+          updateData.jobResume = JSON.stringify(resume)
+          console.log('AI Processor: Saving structured resume (JSON) to database')
+        }
+      }
     }
 
     if (results.coverLetterOutline) {
@@ -154,7 +166,7 @@ export async function processJobWithAI(jobId: string, config: Configuration): Pr
 export async function getConfiguration(): Promise<Configuration | null> {
   try {
     const config = await prisma.configuration.findFirst()
-    return config
+    return config as Configuration | null
   } catch (error) {
     console.error('Error fetching configuration:', error)
     return null

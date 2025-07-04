@@ -411,6 +411,8 @@ CRITICAL: You must respond with valid JSON containing exactly these fields:
 - salaryRange: Compensation range if mentioned, or "Not specified" (string)
 - companyInfo: Company background, culture, size, industry context (string, 2-3 sentences)
 - customizedResume: Complete resume text optimized for this specific job (string)
+- matchedKeywords: Array of keywords that appear in both the resume and job description (array of strings)
+- unmatchedKeywords: Array of important job keywords not found in the resume (array of strings)
 
 JSON FORMAT REQUIREMENTS:
 - Use double quotes for all strings
@@ -422,14 +424,22 @@ JSON FORMAT REQUIREMENTS:
   "title": "Software Engineer",
   "salaryRange": "$80,000 - $120,000",
   "companyInfo": "Example Corp is a tech startup...",
-  "customizedResume": "Complete resume text here..."
+  "customizedResume": "Complete resume text here...",
+  "matchedKeywords": ["JavaScript", "React", "Node.js", "AWS"],
+  "unmatchedKeywords": ["Kubernetes", "Docker", "GraphQL"]
 }
 
 ANALYSIS PROCESS:
 1. Extract company name, job title, and salary information
 2. Research company context from job description details
 3. Identify key skills, qualifications, and requirements
-4. Customize the source resume by:
+4. Perform keyword matching analysis:
+   - Extract technical skills, tools, technologies, and certifications from job description
+   - Compare these keywords with the resume content
+   - Create matchedKeywords array for skills found in both
+   - Create unmatchedKeywords array for job requirements not in resume
+   - Focus on technical terms, avoid generic words like "experience", "team", "work"
+5. Customize the source resume by:
    - Emphasizing relevant experience and skills
    - Using keywords from the job description
    - Highlighting achievements that match the role
@@ -442,6 +452,15 @@ RESUME CUSTOMIZATION GUIDELINES:
 - Use action verbs and quantifiable achievements
 - Include relevant keywords naturally throughout
 - Ensure the customized resume flows well and tells a compelling story
+
+KEYWORD MATCHING GUIDELINES:
+- Focus on technical skills: programming languages, frameworks, tools, software
+- Include certifications, qualifications, and specific methodologies
+- Extract industry-specific terms and technologies
+- Identify years of experience requirements ("5+ years Python")
+- Include relevant education requirements and degrees
+- Avoid generic terms: "experience", "team", "communication", "leadership"
+- Be thorough but precise - capture meaningful skills gaps and matches
 
 Respond only with valid JSON - no additional text or formatting.
 ```
@@ -485,8 +504,10 @@ Create an outline that serves as a clear roadmap for writing a compelling, perso
 **Important Notes:**
 - The Job Analysis prompt must return valid JSON or the system will show an error
 - The customizedResume field should contain your complete resume text, not just changes
+- The matchedKeywords and unmatchedKeywords fields must be arrays of strings
 - Company information from the first service automatically feeds into the cover letter service
 - Both prompts can be modified to match your writing style and industry focus
+- Keyword matching helps identify skills gaps and resume optimization opportunities
 
 ---
 

@@ -76,9 +76,11 @@ async function handleJobAnalysis(openai: OpenAI, body: any) {
 
   try {
     // Adjust prompt based on resume format
+    const keywordInstructions = '\n\nKEYWORD MATCHING ANALYSIS:\n1. Extract key technical skills, tools, technologies, and important qualifications from the job description\n2. Compare these keywords with the resume content\n3. Return matchedKeywords: array of keywords that appear in both the job description and resume\n4. Return unmatchedKeywords: array of important keywords from the job description that do NOT appear in the resume\n5. Focus on technical skills, certifications, tools, programming languages, frameworks, and key qualifications\n6. Be thorough but avoid generic words like "experience", "team", "work"'
+    
     const systemPrompt = resumeFormat === 'structured' 
-      ? prompt + '\n\nThe source resume is in structured JSON format. You must respond with a JSON object containing these exact fields: companyName, title, salaryRange, companyInfo, customizedResume. For customizedResume, return the updated structured JSON format with customizations applied. Make sure the JSON is valid and properly formatted.'
-      : prompt + '\n\nYou must respond with a JSON object containing these exact fields: companyName, title, salaryRange, companyInfo, customizedResume. Make sure the JSON is valid and properly formatted.'
+      ? prompt + '\n\nThe source resume is in structured JSON format. You must respond with a JSON object containing these exact fields: companyName, title, salaryRange, companyInfo, customizedResume, matchedKeywords, unmatchedKeywords. For customizedResume, return the updated structured JSON format with customizations applied. Make sure the JSON is valid and properly formatted.' + keywordInstructions
+      : prompt + '\n\nYou must respond with a JSON object containing these exact fields: companyName, title, salaryRange, companyInfo, customizedResume, matchedKeywords, unmatchedKeywords. Make sure the JSON is valid and properly formatted.' + keywordInstructions
 
     const completion = await openai.chat.completions.create({
       model,
@@ -111,6 +113,17 @@ async function handleJobAnalysis(openai: OpenAI, body: any) {
       // Validate required fields
       if (!analysisData.customizedResume) {
         throw new Error('Missing customizedResume in response')
+      }
+      
+      // Validate keyword arrays (should be arrays, but can be empty)
+      if (!Array.isArray(analysisData.matchedKeywords)) {
+        console.warn('matchedKeywords is not an array, defaulting to empty array')
+        analysisData.matchedKeywords = []
+      }
+      
+      if (!Array.isArray(analysisData.unmatchedKeywords)) {
+        console.warn('unmatchedKeywords is not an array, defaulting to empty array')
+        analysisData.unmatchedKeywords = []
       }
     } catch (parseError) {
       // If parsing fails, return error with details

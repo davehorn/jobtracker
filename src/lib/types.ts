@@ -63,6 +63,8 @@ export interface AIJobAnalysisResponse {
   salaryRange?: string
   companyInfo?: string
   customizedResume: string
+  matchedKeywords: string[]
+  unmatchedKeywords: string[]
 }
 
 export interface AICoverLetterResponse {

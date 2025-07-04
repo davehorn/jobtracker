@@ -23,6 +23,8 @@ model Job {
   jobInfo               String?  // JSON string for company information
   jobResume             String?
   coverLetterOutline    String?
+  matchedKeywords       String?  // JSON array of keywords that match between resume and job
+  unmatchedKeywords     String?  // JSON array of job keywords not found in resume
   appliedDate           DateTime?
   closedDate            DateTime?
 

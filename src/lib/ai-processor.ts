@@ -70,7 +70,9 @@ export async function processJobWithAI(jobId: string, config: Configuration): Pr
           title: results.jobAnalysis.title,
           salaryRange: results.jobAnalysis.salaryRange,
           hasCompanyInfo: !!results.jobAnalysis.companyInfo,
-          hasCustomizedResume: !!results.jobAnalysis.customizedResume
+          hasCustomizedResume: !!results.jobAnalysis.customizedResume,
+          matchedKeywords: results.jobAnalysis.matchedKeywords?.length || 0,
+          unmatchedKeywords: results.jobAnalysis.unmatchedKeywords?.length || 0
         })
       } else {
         console.error('Job analysis failed:', jobAnalysisData.error)
@@ -127,6 +129,17 @@ export async function processJobWithAI(jobId: string, config: Configuration): Pr
           updateData.jobResume = JSON.stringify(resume)
           console.log('AI Processor: Saving structured resume (JSON) to database')
         }
+      }
+      
+      // Handle keyword arrays - serialize to JSON strings for database storage
+      if (results.jobAnalysis.matchedKeywords && Array.isArray(results.jobAnalysis.matchedKeywords)) {
+        updateData.matchedKeywords = JSON.stringify(results.jobAnalysis.matchedKeywords)
+        console.log('AI Processor: Saving', results.jobAnalysis.matchedKeywords.length, 'matched keywords')
+      }
+      
+      if (results.jobAnalysis.unmatchedKeywords && Array.isArray(results.jobAnalysis.unmatchedKeywords)) {
+        updateData.unmatchedKeywords = JSON.stringify(results.jobAnalysis.unmatchedKeywords)
+        console.log('AI Processor: Saving', results.jobAnalysis.unmatchedKeywords.length, 'unmatched keywords')
       }
     }
 

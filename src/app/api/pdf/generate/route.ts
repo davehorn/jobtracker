@@ -8,13 +8,21 @@ interface PDFGenerationRequest {
   resumeData: string
   companyName?: string
   jobTitle?: string
+  userName?: string
 }
 
 /**
  * Generate a smart filename for the PDF export
  */
-function generatePDFFilename(companyName?: string, jobTitle?: string): string {
-  const parts = ['Resume']
+function generatePDFFilename(userName?: string, companyName?: string, jobTitle?: string): string {
+  const parts = []
+  
+  if (userName) {
+    const cleanName = userName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_').substring(0, 20)
+    parts.push(cleanName)
+  }
+  
+  parts.push('Resume')
   
   if (companyName) {
     const cleanCompany = companyName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_').substring(0, 20)
@@ -56,7 +64,7 @@ function getResumeHTML(resumeData: string): string {
   const plainHTML = `
     <div class="plain-text-resume">
       <h1>Resume</h1>
-      <pre style="white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.2; margin: 8px 0; color: #000000;">${resumeData}</pre>
+      <pre style="white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 8pt; line-height: 1.2; margin: 8px 0; color: #000000;">${resumeData}</pre>
     </div>
   `
   
@@ -77,7 +85,7 @@ function createPrintHTML(htmlContent: string): string {
         /* ATS-Optimized Resume Styling */
         body {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           line-height: 1.2;
           color: #000000;
           width: 100%;
@@ -88,55 +96,55 @@ function createPrintHTML(htmlContent: string): string {
           box-sizing: border-box;
         }
         
-        /* Name - Bold, Arial 10pt */
+        /* Name - Bold, Arial 8pt */
         h1 {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: bold;
           margin: 0 0 8px 0;
           color: #000000;
           text-align: center;
         }
         
-        /* Section Headers - Bold, Arial 10pt */
+        /* Section Headers - Bold, Arial 8pt */
         h2 {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: bold;
           margin: 12px 0 4px 0;
           color: #000000;
           text-transform: uppercase;
         }
         
-        /* Sub-headers - Regular, Arial 10pt */
+        /* Sub-headers - Regular, Arial 8pt */
         h3 {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: normal;
           margin: 8px 0 2px 0;
           color: #000000;
         }
         
-        /* Paragraphs - Regular, Arial 10pt */
+        /* Paragraphs - Regular, Arial 8pt */
         p {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: normal;
           margin: 0 0 4px 0;
           color: #000000;
         }
         
-        /* Lists - Regular, Arial 10pt */
+        /* Lists - Regular, Arial 8pt */
         ul {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           margin: 0 0 8px 0;
           padding-left: 20px;
         }
         
         li {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: normal;
           margin: 0 0 2px 0;
           color: #000000;
@@ -147,7 +155,7 @@ function createPrintHTML(htmlContent: string): string {
           text-align: center;
           margin: 0 0 16px 0;
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: normal;
         }
         
@@ -189,7 +197,7 @@ function createPrintHTML(htmlContent: string): string {
         .job h3,
         .job .company {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: bold;
           color: #000000;
         }
@@ -202,7 +210,7 @@ function createPrintHTML(htmlContent: string): string {
         /* Dates styling */
         .dates {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: normal;
           color: #000000;
           margin: 0 0 4px 0;
@@ -221,7 +229,7 @@ function createPrintHTML(htmlContent: string): string {
         /* Technologies line */
         .technologies {
           font-family: Arial, sans-serif;
-          font-size: 10pt;
+          font-size: 8pt;
           font-weight: normal;
           color: #000000;
           margin: 2px 0 0 0;
@@ -244,12 +252,13 @@ export async function POST(request: NextRequest) {
     
     // Parse request body
     const body: PDFGenerationRequest = await request.json()
-    const { resumeData, companyName, jobTitle } = body
+    const { resumeData, companyName, jobTitle, userName } = body
     
     console.log('[PDF-API] Request details:', {
       resumeLength: resumeData?.length || 0,
       companyName: companyName || 'Not provided',
-      jobTitle: jobTitle || 'Not provided'
+      jobTitle: jobTitle || 'Not provided',
+      userName: userName || 'Not provided'
     })
     
     if (!resumeData) {
@@ -265,7 +274,7 @@ export async function POST(request: NextRequest) {
     const printHTML = createPrintHTML(resumeHTML)
     
     // Generate filename
-    const filename = generatePDFFilename(companyName, jobTitle)
+    const filename = generatePDFFilename(userName, companyName, jobTitle)
     console.log('[PDF-API] 📁 Generated filename:', filename)
     
     // Launch Puppeteer

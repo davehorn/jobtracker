@@ -71,6 +71,7 @@ Thumbs.db
 
 # Claude Code settings
 .claude/
+TODO.md
 
 # Temporary files
 tmp/

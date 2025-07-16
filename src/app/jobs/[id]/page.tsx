@@ -263,6 +263,21 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
     saveResumeWithData(trimmedContent)
   }
 
+  const getUserNameFromConfig = async (): Promise<string | undefined> => {
+    try {
+      const response = await fetch('/api/config')
+      const data = await response.json()
+      
+      if (data.success && data.data?.structuredResume) {
+        const structuredResume = JSON.parse(data.data.structuredResume)
+        return structuredResume?.contact?.name
+      }
+    } catch (error) {
+      console.log('[JOB] Could not fetch user name from config:', error)
+    }
+    return undefined
+  }
+
   const handleExportPDF = async () => {
     console.log('[JOB] 🚀 PDF Export button clicked')
     console.log('[JOB] Job data:', {
@@ -285,11 +300,16 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
     setError(null)
 
     try {
+      console.log('[JOB] 📞 Fetching user name from configuration...')
+      const userName = await getUserNameFromConfig()
+      console.log('[JOB] User name:', userName || 'Not found')
+      
       console.log('[JOB] 📞 Calling exportResumeToPDF function...')
       await exportResumeToPDF({
         resumeData: job.jobResume,
         companyName: job.companyName || undefined,
-        jobTitle: job.title || undefined
+        jobTitle: job.title || undefined,
+        userName: userName
       })
       console.log('[JOB] ✅ PDF export completed successfully')
     } catch (err) {

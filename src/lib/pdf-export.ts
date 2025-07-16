@@ -2,6 +2,7 @@ interface PDFExportOptions {
   resumeData: string
   companyName?: string
   jobTitle?: string
+  userName?: string
 }
 
 /**
@@ -10,13 +11,15 @@ interface PDFExportOptions {
 export async function exportResumeToPDF({
   resumeData,
   companyName,
-  jobTitle
+  jobTitle,
+  userName
 }: PDFExportOptions): Promise<void> {
   try {
     console.log('[PDF] 🚀 Starting server-side PDF export')
     console.log('[PDF] Resume data length:', resumeData?.length || 0)
     console.log('[PDF] Company name:', companyName || 'Not provided')
     console.log('[PDF] Job title:', jobTitle || 'Not provided')
+    console.log('[PDF] User name:', userName || 'Not provided')
     
     // Make API request to server-side PDF generation
     console.log('[PDF] 📞 Calling server-side PDF generation API...')
@@ -28,7 +31,8 @@ export async function exportResumeToPDF({
       body: JSON.stringify({
         resumeData,
         companyName,
-        jobTitle
+        jobTitle,
+        userName
       })
     })
     
